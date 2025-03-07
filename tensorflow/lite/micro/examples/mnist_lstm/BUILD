@@ -1,3 +1,4 @@
+load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 load("@tflm_pip_deps//:requirements.bzl", "requirement")
 
 py_binary(
@@ -6,7 +7,7 @@ py_binary(
     srcs_version = "PY3",
     deps = [
         requirement("numpy"),
-        requirement("tensorflow-cpu"),
+        requirement("tensorflow"),
     ],
 )
 
@@ -15,8 +16,9 @@ py_binary(
     srcs = ["evaluate.py"],
     srcs_version = "PY3",
     deps = [
-        "//tensorflow/lite/micro/python/interpreter/src:tflm_runtime",
+        "//python/tflite_micro:runtime",
         "@absl_py//absl:app",
+        requirement("pillow"),
     ],
 )
 
@@ -37,7 +39,7 @@ py_test(
     python_version = "PY3",
     tags = [
         "noasan",
-        "nomsan",  # Python doesn't like these symbols from interpreter_wrapper_pybind.so
+        "nomsan",  # Python doesn't like these symbols
         "noubsan",
     ],
     deps = [

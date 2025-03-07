@@ -119,7 +119,7 @@ def build_mock_flatbuffer_model():
   schema_fb.TensorStart(builder)
   schema_fb.TensorAddName(builder, string1_offset)
   schema_fb.TensorAddShape(builder, shape1_offset)
-  schema_fb.TensorAddType(builder, 0)
+  schema_fb.TensorAddType(builder, schema_fb.TensorType.UINT8)
   schema_fb.TensorAddBuffer(builder, 1)
   schema_fb.TensorAddQuantization(builder, quantization1_offset)
   tensor1_offset = schema_fb.TensorEnd(builder)
@@ -268,6 +268,22 @@ def build_mock_flatbuffer_model():
   model = builder.Output()
 
   return model
+
+
+def build_operator_with_options() -> schema_fb.Operator:
+  """Builds an operator with the given options."""
+  builder = flatbuffers.Builder(1024)
+  schema_fb.StableHLOCompositeOptionsStart(builder)
+  schema_fb.StableHLOCompositeOptionsAddDecompositionSubgraphIndex(builder, 10)
+  opts = schema_fb.StableHLOCompositeOptionsEnd(builder)
+  schema_fb.OperatorStart(builder)
+  schema_fb.OperatorAddBuiltinOptions2(builder, opts)
+  schema_fb.OperatorAddBuiltinOptions2Type(
+      builder, schema_fb.BuiltinOptions2.StableHLOCompositeOptions
+  )
+  op_offset = schema_fb.OperatorEnd(builder)
+  builder.Finish(op_offset)
+  return schema_fb.Operator.GetRootAs(builder.Output())
 
 
 def load_model_from_flatbuffer(flatbuffer_model):

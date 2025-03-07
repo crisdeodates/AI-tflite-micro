@@ -23,7 +23,7 @@ from absl import app
 from absl import flags
 from mako import template
 
-from tflite_micro.tensorflow.lite.tools import visualize as visualize
+from tensorflow.lite.tools import visualize
 
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 TEMPLATE_DIR = os.path.abspath(TEMPLATE_DIR)
@@ -69,8 +69,9 @@ def ParseString(word):
     else:
       formated_op_string += part.upper()
 
-  # Edge case for AddUnidirectionalSequenceLSTM().
+  # Edge cases
   formated_op_string = formated_op_string.replace('Lstm', 'LSTM')
+  formated_op_string = formated_op_string.replace('BatchMatmul', 'BatchMatMul')
 
   return 'Add' + formated_op_string
 

@@ -20,11 +20,11 @@ import tensorflow as tf
 from tensorflow.python.framework import test_util
 from tensorflow.python.platform import test
 from tflite_micro.tensorflow.lite.micro.tools import requantize_flatbuffer
-from tflite_micro.tensorflow.lite.micro.python.interpreter.src import tflm_runtime
+from tflite_micro.python.tflite_micro import runtime
 from tflite_micro.tensorflow.lite.tools import flatbuffer_utils
 
 
-#TODO(b/248061370): replace the keras model creation process with flatbuffer manipulation to speed up test
+# TODO(b/248061370): replace the keras model creation process with flatbuffer manipulation to speed up test
 def create_simple_fc_model():
   '''Create a simple model with two fully connected(fc) layers'''
   model = tf.keras.models.Sequential([
@@ -60,6 +60,9 @@ def convert_tfl_converter(keras_model,
         EXPERIMENTAL_TFLITE_BUILTINS_ACTIVATIONS_INT16_WEIGHTS_INT8
     ]
   converter.representative_dataset = representative_dataset_gen
+  # TODO(b/324385802): Support per-channel quantization for FullyConnected.
+  converter._experimental_disable_per_channel_quantization_for_dense_layers = True
+  converter._experimental_disable_per_channel = True
   return converter.convert()
 
 
@@ -92,9 +95,9 @@ class SimpleFCModelTest(test_util.TensorFlowTestCase):
     int8_converted_int16_model = convert_8to16_requantizer(
         keras_model, representative_dataset_gen)
 
-    interpreter_tfl_converted = tflm_runtime.Interpreter.from_bytes(
+    interpreter_tfl_converted = runtime.Interpreter.from_bytes(
         tfl_converted_int16_model)
-    interpreter_tool_converted = tflm_runtime.Interpreter.from_bytes(
+    interpreter_tool_converted = runtime.Interpreter.from_bytes(
         int8_converted_int16_model)
 
     num_steps = 10
